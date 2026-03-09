@@ -44,22 +44,22 @@ interface GameState {
 export default function FlappyScreen() {
   const router = useRouter();
   const [, forceUpdate] = useState(0);
-  const stateRef = useRef<GameState>(createInitialState());
-  const rafRef = useRef<number>(0);
-  const timeRef = useRef<number>(0);
-
-  function createInitialState(): GameState {
+  function createInitialState(prevHighScore = 0): GameState {
     return {
       birdY: SCREEN_H / 2.5,
       birdVelocity: 0,
       pipes: [],
       score: 0,
-      highScore: stateRef.current?.highScore ?? 0,
+      highScore: prevHighScore,
       gameState: 'waiting',
       lastSpawn: 0,
       groundOffset: 0,
     };
   }
+
+  const stateRef = useRef<GameState>(createInitialState());
+  const rafRef = useRef<number>(0);
+  const timeRef = useRef<number>(0);
 
   function spawnPipe(now: number): Pipe {
     const minTop = 80;
@@ -77,7 +77,7 @@ export default function FlappyScreen() {
     } else if (s.gameState === 'playing') {
       s.birdVelocity = FLAP_FORCE;
     } else if (s.gameState === 'dead') {
-      stateRef.current = createInitialState();
+      stateRef.current = createInitialState(stateRef.current.highScore);
       stateRef.current.gameState = 'waiting';
     }
   };
